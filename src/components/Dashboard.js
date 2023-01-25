@@ -17,6 +17,12 @@ export default function Dashboard() {
 
     const btnClassName = `bg-blue-600 w-full hover:bg-blue-700 text-white font-bold mt-6 py-2 px-4 rounded ${isGeneratingState}`
 
+    const requestOptions = (opts) => ({
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(opts),
+    })
+
     const handleSubmit = async (e) => {
         console.log(e);
         console.log({
@@ -28,35 +34,23 @@ export default function Dashboard() {
         });
         e.preventDefault();
         setIsGenerating(true);
-        const res = await fetch("/api/returnJobDescription", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            jobTitle,
-            industry,
-            keyWords,
-            tone,
-            numWords,
-          }),
-        });
+        const res = await fetch("/api/returnJobDescription", requestOptions({ jobTitle,industry,keyWords,tone,numWords,}));
         setIsGenerating(false);
         const data = await res.json();
         console.log(data);
         setJobDescription(data.jobDescription.trim());
-      };
+    };
 
-      const handleCopy = () => {
+    const handleCopy = () => {
         navigator.clipboard.writeText(jobDescription);
         setIsCopied(true);
-      };
+    };
 
     return (
         <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="grid gap-y-12 md:grid-cols-2 md:gap-x-12 ">
-                <div className="">
-                    <form onSubmit={e=>handleSubmit(e)}>
+                <div>
+                    <form onSubmit={e => handleSubmit(e)}>
                         <div className="flex flex-col">
                             <label className="sr-only" htmlFor="jobTitle">
                                 Job Title
@@ -145,7 +139,7 @@ export default function Dashboard() {
                 </div>
                 <div className="h-full">
                     <div className="flex flex-col h-full">
-                        
+
                         <label htmlFor="output" className="sr-only">
                             Output
                         </label>
@@ -155,7 +149,7 @@ export default function Dashboard() {
                                     ? 7
                                     : jobDescription.split("\\n").length + 12
                             }
-                            
+
                             name="output"
                             onChange={(e) => setJobDescription(e.target.value)}
                             value={jobDescription}
