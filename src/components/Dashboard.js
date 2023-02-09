@@ -1,6 +1,8 @@
+import { useRouter } from "next/router";
 import React, { useState } from "react";
 
 export default function Dashboard() {
+    const router = useRouter()
     const [jobDescription, setJobDescription] = useState("");
 
     const [jobTitle, setJobTitle] = useState("");
@@ -24,21 +26,30 @@ export default function Dashboard() {
     })
 
     const handleSubmit = async (e) => {
-        console.log(e);
-        console.log({
-            jobTitle,
-            industry,
-            keyWords,
-            tone,
-            numWords,
-        });
-        e.preventDefault();
-        setIsGenerating(true);
-        const res = await fetch("/api/returnJobDescription", requestOptions({ jobTitle,industry,keyWords,tone,numWords,}));
-        setIsGenerating(false);
-        const data = await res.json();
-        console.log(data);
-        setJobDescription(data.jobDescription.trim());
+        try {
+            console.log(e);
+            console.log({
+                jobTitle,
+                industry,
+                keyWords,
+                tone,
+                numWords,
+            });
+            e.preventDefault();
+            setIsGenerating(true);
+            const res = await fetch("/api/returnJobDescription", requestOptions({ jobTitle,industry,keyWords,tone,numWords,}));
+            setIsGenerating(false);
+            const data = await res.json();
+            console.log(data);
+            setJobDescription(data.jobDescription.trim());
+        } catch (error) {
+            const pushUrl = new URL(location.origin);
+            pushUrl.pathname = 'internal-error';
+            pushUrl.searchParams.append('message',error.message);
+            pushUrl.searchParams.append('stack',error.stack);
+            router.push(pushUrl);
+        }
+
     };
 
     const handleCopy = () => {
