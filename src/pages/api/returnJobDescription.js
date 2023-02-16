@@ -1,50 +1,37 @@
-const generateDescription = async ({
+import { Configuration, OpenAIApi } from "openai";
+
+const openAiConfig = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY
+})
+
+const generatePrompt = ({ 
   jobTitle,
   industry,
   keyWords,
   tone,
-  numWords,
-}) => {
-  try {
-    const requestOptions = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        prompt: `Write a job description for a ${jobTitle} role${industry ? `in the ${industry} industry` : ""} that is around ${numWords || 200} words in a ${tone || "neutral"} tone${keyWords ? `Incorporate the following keywords: ${keyWords}.` : "."} The job position should be described in a way that is SEO friendly, highlighting its unique features and benefits.`,
-        max_tokens: numWords || 200,
-        temperature: 0.5,
-      }),
-    }
-    console.log(requestOptions);
-    const response = await fetch(
-      "https://api.openai.com/v1/engines/text-davinci-003/completions", requestOptions);
-    console.log(response);
-    console.log(response.status)
-    const data = await response.json();
+  numWords }) => `Write a job description for a ${jobTitle} role${industry ? `in the ${industry} industry` : ""} that is around ${numWords || 200} words in a ${tone || "neutral"} tone${keyWords ? `Incorporate the following keywords: ${keyWords}.` : "."} The job position should be described in a way that is SEO friendly, highlighting its unique features and benefits.`;
 
-    return data.choices[0].text;
-  } catch (err) {
-    console.error(err);
-  }
+const generateDescription = async (input) => {
+
+  const openai = new OpenAIApi(openAiConfig);
+
+  const completion = await openai.createCompletion({
+    model: 'text-davinci-003',
+    prompt: generatePrompt(input),
+    max_tokens: input.numWords || 200,
+    temperature: 0.5,
+  })
+
+  console.log(completion);
+  return completion.data.choices[0].text;
 };
 
 export default async function handler(req, res) {
-  const { jobTitle, industry, keyWords, tone, numWords } = req.body;
+  // const { jobTitle, industry, keyWords, tone, numWords } = req.body;
 
-  console.log(req.body);
+  console.log(typeof req.body);
 
-  const jobDescription = await generateDescription({
-    jobTitle,
-    industry,
-    keyWords,
-    tone,
-    numWords,
-  });
+  const jobDescription = await generateDescription(req.body);
 
-  res.status(200).json({
-    jobDescription,
-  });
+  res.status(200).json({jobDescription});
 }
