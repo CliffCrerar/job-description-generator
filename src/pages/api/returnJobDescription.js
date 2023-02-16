@@ -13,6 +13,8 @@ const generatePrompt = ({
 
 const generateDescription = async (input) => {
 
+  console.log(openAiConfig);
+
   const openai = new OpenAIApi(openAiConfig);
 
   const completion = await openai.createCompletion({
@@ -29,9 +31,13 @@ const generateDescription = async (input) => {
 export default async function handler(req, res) {
   // const { jobTitle, industry, keyWords, tone, numWords } = req.body;
 
-  console.log(typeof req.body);
+  console.log(typeof 
+    
+  console.log(process.env.OPENAI_API_KEY);
 
   const jobDescription = await generateDescription(req.body);
+
+  console.log(jobDescription);
 
   res.status(200).json({jobDescription});
 }
