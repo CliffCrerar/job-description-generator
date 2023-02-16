@@ -37,7 +37,7 @@ export default function Dashboard() {
             });
             e.preventDefault();
             setIsGenerating(true);
-            const res = await fetch("/api/returnJobDescription", requestOptions({ jobTitle,industry,keyWords,tone,numWords,}));
+            const res = await fetch("/api/returnJobDescription", {body: { jobTitle,industry,keyWords,tone,numWords}});
             setIsGenerating(false);
             const data = await res.json();
             console.log(data);
